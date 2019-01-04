@@ -9,6 +9,93 @@ const inquirer = require("inquirer");
 const gh = require("parse-github-url");
 const https = require('https');
 
+const getPulls = (username) => {
+    let options = {
+        host: 'api.github.com',
+        path: `/repos/${username}/pulls`,
+        method: 'GET',
+        headers: { 'user-agent': 'node.js' }
+    };
+    //API request
+    //sample reqURL : https://api.github.com/repos/octocat/Hello-World/pulls/1347",
+    //GET pull requests
+    let request = https.request(options, function (response) {
+        let body = [];
+        response.on("data", function (chunk) {
+            body += chunk.toString('utf8');
+        });
+
+        response.on("end", function () {
+            let pullResp = JSON.parse(body);
+            //GET /repos/:owner/:repo/pulls/:number/commits
+            console.log("Pull Requests for Repo")
+            pullResp.forEach(pull => {
+                getCommits(username, pull.number);
+                getComments(username, pull.number);
+                // console.log("-----------------------------")
+                // console.log(`Title: ${pull.title}`);
+                // console.log(`Number: ${pull.number}`);
+                // console.log(`Author: ${pull.user.login}`);
+                // console.log(`Body: ${pull.body}`);
+                // console.log("-----------------------------");
+            })
+        });
+
+    });
+
+    request.end();
+
+}
+
+const getCommits = (username, number) => {
+    let options = {
+        host: 'api.github.com',
+        path: `/repos/${username}/pulls/${number}/commits`,
+        method: 'GET',
+        headers: { 'user-agent': 'node.js' }
+    };
+
+    let request = https.request(options, function (response) {
+        let body = [];
+
+        response.on("data", function (chunk) {
+            body += chunk.toString('utf8');
+        });
+
+        response.on("end", function () {
+            let commitResp = JSON.parse(body);
+            console.log(commitResp.length);
+        })
+    });
+    request.end();
+
+}
+
+//GET /repos/:owner/:repo/pulls/:number/comments
+const getComments = (username, number) => {
+
+    let options = {
+        host: 'api.github.com',
+        path: `/repos/${username}/pulls/${number}/comments`,
+        method: 'GET',
+        headers: { 'user-agent': 'node.js' }
+    };
+
+    let request = https.request(options, function (response) {
+        let body = [];
+
+        response.on("data", function (chunk) {
+            body += chunk.toString('utf8');
+        });
+
+        response.on("end", function () {
+            let commentResp = JSON.parse(body);
+            console.log(commentResp);
+        })
+    });
+    request.end();
+}
+
 
 inquirer.prompt([
     {
@@ -21,42 +108,7 @@ inquirer.prompt([
         let ghURL = gh(res.repoURL);
         let username = ghURL.path;
 
-        let options = {
-            host: 'api.github.com',
-            path: `/repos/${username}/pulls`,
-            method: 'GET',
-            headers: { 'user-agent': 'node.js' }
-        };
-        //API request
-        //sample reqURL : https://api.github.com/repos/octocat/Hello-World/pulls/1347",
-        //GET pull requests
-        let request = https.request(options, function (response) {
-            let body = [];
-            response.on("data", function (chunk) {
-                body += chunk.toString('utf8');
-            });
-
-            response.on("end", function () {
-                let pullResp = JSON.parse(body);
-
-                pullResp.forEach(pull => {
-                    console.log("-----------------------------")
-                    console.log(`Title: ${pull.title}`);
-                    console.log(`Number: ${pull.number}`);
-                    console.log(`Author: ${pull.user.login}`);
-                    console.log(`Body: ${pull.body}`);
-                    console.log("-----------------------------");
-
-
-
-                })
-                //console.log("Body: ", JSON.parse(body));
-                //GET /repos/:owner/:repo/pulls/:number/commits
-            });
-
-        });
-
-        request.end();
+        getPulls(username);
 
 
     })
