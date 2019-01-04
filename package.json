@@ -1,0 +1,29 @@
+{
+  "name": "node-test-hotel-engine",
+  "version": "1.0.0",
+  "description": "GitHub Repo Pull Request Viewer",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cetges86/node-test.git"
+  },
+  "keywords": [
+    "node",
+    "github-api",
+    "pull"
+  ],
+  "author": "Chris Etges",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cetges86/node-test/issues"
+  },
+  "homepage": "https://github.com/cetges86/node-test#readme",
+  "dependencies": {
+    "inquirer": "^6.2.1",
+    "parse-github-url": "^1.0.2",
+    "request": "^2.88.0"
+  }
+}
