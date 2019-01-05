@@ -9,6 +9,8 @@ const inquirer = require("inquirer");
 const gh = require("parse-github-url");
 const https = require('https');
 
+//sample reqURL : https://api.github.com/repos/octocat/Hello-World/pulls/1347",
+//GET pull requests
 const getPulls = (username) => {
     let options = {
         host: 'api.github.com',
@@ -17,8 +19,6 @@ const getPulls = (username) => {
         headers: { 'user-agent': 'node.js' }
     };
     //API request
-    //sample reqURL : https://api.github.com/repos/octocat/Hello-World/pulls/1347",
-    //GET pull requests
     let request = https.request(options, function (response) {
         let body = [];
         response.on("data", function (chunk) {
@@ -27,26 +27,32 @@ const getPulls = (username) => {
 
         response.on("end", function () {
             let pullResp = JSON.parse(body);
-            //GET /repos/:owner/:repo/pulls/:number/commits
             console.log("Pull Requests for Repo")
+            // pullResp.forEach(pull => {
+            //     //getCommits(username, pull.number);
+            //     //getComments(username, pull.number);
+            //     console.log("-----------------------------")
+            //     console.log(`Title: ${pull.title}`);
+            //     console.log(`Number: ${pull.number}`);
+            //     console.log(`Author: ${pull.user.login}`);
+            //     console.log(`Body: ${pull.body}`);
+            //     console.log("-----------------------------");
+            // })
             pullResp.forEach(pull => {
-                getCommits(username, pull.number);
-                getComments(username, pull.number);
-                // console.log("-----------------------------")
-                // console.log(`Title: ${pull.title}`);
-                // console.log(`Number: ${pull.number}`);
-                // console.log(`Author: ${pull.user.login}`);
-                // console.log(`Body: ${pull.body}`);
-                // console.log("-----------------------------");
-            })
+                console.log(pull.comments_url);
+                console.log(pull.commits_url);
+
+
+            })    
         });
-
+        
     });
-
+    
     request.end();
-
+    
 }
 
+//GET /repos/:owner/:repo/pulls/:number/commits
 const getCommits = (username, number) => {
     let options = {
         host: 'api.github.com',
@@ -64,7 +70,7 @@ const getCommits = (username, number) => {
 
         response.on("end", function () {
             let commitResp = JSON.parse(body);
-            console.log(commitResp.length);
+            return commitResp.length;
         })
     });
     request.end();
@@ -91,6 +97,7 @@ const getComments = (username, number) => {
         response.on("end", function () {
             let commentResp = JSON.parse(body);
             console.log(commentResp);
+            return commentResp.length;
         })
     });
     request.end();
