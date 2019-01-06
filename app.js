@@ -9,6 +9,8 @@ const inquirer = require("inquirer");
 const gh = require("parse-github-url");
 const https = require('https');
 
+//a2679537e996c0c6a68d1cbb28e1e9a2d04efd56
+
 //sample reqURL : https://api.github.com/repos/octocat/Hello-World/pulls/1347",
 //GET pull requests
 const getPulls = (username) => {
@@ -28,38 +30,26 @@ const getPulls = (username) => {
         response.on("end", function () {
             let pullResp = JSON.parse(body);
             console.log("Pull Requests for Repo")
-            // pullResp.forEach(pull => {
-            //     //getCommits(username, pull.number);
-            //     //getComments(username, pull.number);
-            //     console.log("-----------------------------")
-            //     console.log(`Title: ${pull.title}`);
-            //     console.log(`Number: ${pull.number}`);
-            //     console.log(`Author: ${pull.user.login}`);
-            //     console.log(`Body: ${pull.body}`);
-            //     console.log("-----------------------------");
-            // })
+            console.log("--------------------------------")
+            //console.log(pullResp);
             pullResp.forEach(pull => {
-                console.log(pull.comments_url);
-                console.log(pull.commits_url);
-
-
-            })    
+                displayInfo(pull, getCommits(pull.commits_url), getComments(pull.comments_url));
+            })
         });
-        
     });
-    
     request.end();
-    
 }
 
 //GET /repos/:owner/:repo/pulls/:number/commits
-const getCommits = (username, number) => {
+const getCommits = (commitURL) => {
     let options = {
         host: 'api.github.com',
-        path: `/repos/${username}/pulls/${number}/commits`,
+        path: `${commitURL}`,
         method: 'GET',
         headers: { 'user-agent': 'node.js' }
     };
+
+    let numberOfCommits = 69;
 
     let request = https.request(options, function (response) {
         let body = [];
@@ -70,22 +60,27 @@ const getCommits = (username, number) => {
 
         response.on("end", function () {
             let commitResp = JSON.parse(body);
-            return commitResp.length;
+            numberOfCommits = commitResp.length;
+            console.log(`Commits: ${commitResp.length}`);
+            return numberOfCommits;
         })
+        return numberOfCommits;
     });
     request.end();
-
+    return numberOfCommits;
 }
 
 //GET /repos/:owner/:repo/pulls/:number/comments
-const getComments = (username, number) => {
+const getComments = (commentURL) => {
 
     let options = {
         host: 'api.github.com',
-        path: `/repos/${username}/pulls/${number}/comments`,
+        path: `${commentURL}`,
         method: 'GET',
         headers: { 'user-agent': 'node.js' }
     };
+
+    numberOfComments = 0;
 
     let request = https.request(options, function (response) {
         let body = [];
@@ -96,11 +91,24 @@ const getComments = (username, number) => {
 
         response.on("end", function () {
             let commentResp = JSON.parse(body);
-            console.log(commentResp);
-            return commentResp.length;
+            console.log(`Number of Comments: ${commentResp.length}`);
+            numberOfComments = commentResp.length;
+            return numberOfComments;
         })
+        return numberOfComments;
     });
     request.end();
+    return numberOfComments;
+}
+
+displayInfo = (pullArray, commits, comments) => {
+    console.log("--------------------------")
+    console.log(`Title: ${pullArray.title}`);
+    console.log(`Number: ${pullArray.number}`);
+    console.log(`Author: ${pullArray.user.login}`);
+    console.log(`Number of Commits: ${commits}`);
+    console.log(`Number of Comments on PR: ${comments}`)
+    console.log("--------------------------")
 }
 
 
@@ -116,6 +124,4 @@ inquirer.prompt([
         let username = ghURL.path;
 
         getPulls(username);
-
-
     })
